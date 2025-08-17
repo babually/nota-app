@@ -1,5 +1,5 @@
 import { authClient } from '@/lib/auth-client'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/register')({
@@ -7,6 +7,7 @@ export const Route = createFileRoute('/register')({
 })
 
 function Register() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -37,22 +38,35 @@ function Register() {
         password:formData.password, // user password -> min 8 characters by default
         name: formData.fullName, // user display name
         // image, // User image URL (optional)
-        callbackURL: "/dashboard" // A URL to redirect to after the user verifies their email (optional)
+        callbackURL: "/tasks" // A URL to redirect to after the user verifies their email (optional)
     }, {
-        onRequest: (ctx) => {
+        onRequest: () => {
             //show loading
+            
         },
-        onSuccess: (ctx) => {
+        onSuccess: () => {
             //redirect to the dashboard or sign in page
+            router.navigate({ to: '/tasks' })
+            //show success message
+            alert('Registration successful! Please check your email to verify your account.')
+            //clear the form
+            setFormData({
+                fullName: '',
+                email: '',
+                password: '',
+                confirmPassword: '',
+            })
+            //clear the error message
+            // setError('')
         },
         onError: (ctx) => {
             // display the error message
             alert(ctx.error.message);
         },
-});
+  });
 
     // TODO: Send formData to backend API
-  }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">

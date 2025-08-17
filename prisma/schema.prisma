@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String       @id @default(uuid())
+  email         String    @unique
+  name          String?
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+model Task {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  completed     Boolean  @default(false)
+  priority      Priority @default(medium)
+  dueDate       String?
+  category      String?
+  tags          String[]
+  createdAt     DateTime @default(now())
+  attachments   Attachment[] @relation("TaskAttachment")
+  reminder      String?
+  estimatedTime Int? @default(0) @map("estimated_time")
+  subTasks      SubTask[] @relation("SubTask")
+  isOverdue     Boolean  @default(false)
+  updatedAt     DateTime @default(now())
+
+  // userId    String
+  // user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model SubTask {
+  id          String   @id @default(uuid())
+  title       String
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  taskId      String
+  task        Task     @relation("SubTask", fields: [taskId], references: [id])
+}
+model Attachment {
+  id        String   @id @default(uuid())
+  fileName  String
+  fileType  String
+  fileSize  Int
+  fileUrl   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  Task Task[] @relation("TaskAttachment")
+}
+
+enum Priority {
+  high
+  medium
+  low
+}
+
+
