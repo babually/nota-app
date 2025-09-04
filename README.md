@@ -1,4 +1,7 @@
-Welcome to your new TanStack app! 
+Welcome to your new Nota app! 
+
+<img width="1212" height="598" alt="task-image" src="https://github.com/user-attachments/assets/1e333f13-f9f0-4ccc-8631-705de5e770a1" />
+
 
 # Getting Started
 
